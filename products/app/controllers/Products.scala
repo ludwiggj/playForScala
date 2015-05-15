@@ -95,11 +95,11 @@ object Products extends Controller {
   /**
    * Displays the product with the given EAN code.
    */
-//  def show(ean: Long) = Action { implicit request =>
-//    Product.findByEan(ean).map { product =>
-//      Ok(views.html.products.details(product))
-//    }.getOrElse(NotFound)
-//  }
+  def show(ean: Long) = Action { implicit request =>
+    Product.findByEan(ean).map { product =>
+      Ok(views.html.products.details(product))
+    }.getOrElse(NotFound)
+  }
 
   /**
    * Saves a new product’s details.
