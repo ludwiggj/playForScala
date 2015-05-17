@@ -6,7 +6,9 @@
 GET     /                           controllers.Application.index
 
 GET     /products                   controllers.Products.list
+GET     /products/new               controllers.Products.newProduct
 GET     /products/:ean              controllers.Products.show(ean: Long)
+POST    /products                   controllers.Products.save
 
 GET     /barcode/:ean               controllers.Barcodes.barcode(ean: Long)
 
