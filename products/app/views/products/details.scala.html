@@ -23,7 +23,10 @@
     <dd>@product.description</dd>
   </dl>
 
+  @helper.form(action = routes.Products.delete(product.ean)) {
   <a href="@controllers.routes.Products.edit(product.ean)" class="btn">
-      <i class="icon-edit"></i> @Messages("products.edit.command")</a>
+    <i class="icon-edit"></i> @Messages("products.edit.command")</a>
   </a>
+  <input type="submit" class="btn primary" value='@Messages("products.delete.command")'>
+  }
 }

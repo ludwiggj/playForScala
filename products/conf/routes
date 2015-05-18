@@ -12,6 +12,7 @@ GET     /products/:ean/edit         controllers.Products.edit(ean: Long)
 POST    /products                   controllers.Products.save
 POST    /products/:ean              controllers.Products.update(ean: Long)
 PUT     /products/:ean              controllers.Products.update(ean: Long)
+POST    /products/:ean/delete       controllers.Products.delete(ean: Long)
 
 GET     /barcode/:ean               controllers.Barcodes.barcode(ean: Long)
 
