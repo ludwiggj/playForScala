@@ -8,7 +8,10 @@ GET     /                           controllers.Application.index
 GET     /products                   controllers.Products.list
 GET     /products/new               controllers.Products.newProduct
 GET     /products/:ean              controllers.Products.show(ean: Long)
+GET     /products/:ean/edit         controllers.Products.edit(ean: Long)
 POST    /products                   controllers.Products.save
+POST    /products/:ean              controllers.Products.update(ean: Long)
+PUT     /products/:ean              controllers.Products.update(ean: Long)
 
 GET     /barcode/:ean               controllers.Barcodes.barcode(ean: Long)
 

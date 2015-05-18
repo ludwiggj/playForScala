@@ -50,14 +50,6 @@ object Products extends Controller {
     )(Product.apply)(Product.unapply)
   )
 
-  // private val productForm = Form(
-  //    mapping(
-  //      "ean" -> longNumber.verifying("validation.ean.duplicate", Product.findByEan(_).isEmpty),
-  //      "name" -> nonEmptyText,
-  //      "description" -> nonEmptyText
-  //    )(Product.apply)(Product.unapply)
-  //  )
-
   /**
    * Returns true if no [[models.Product]] exists with the given EAN.
    *
@@ -78,10 +70,10 @@ object Products extends Controller {
    * @param ean the previous value of the EAN of the to-be-updated product
    * @return the new form
    */
-  //  private def updateProductForm(ean: Long) =
-  //    makeProductForm("validation.ean.duplicate", { newEan =>
-  //      newEan == ean || isUniqueEan(newEan)
-  //    })
+    private def updateProductForm(ean: Long) =
+      makeProductForm("validation.ean.duplicate", { newEan =>
+        newEan == ean || isUniqueEan(newEan)
+      })
 
   /**
    * Displays a products list.
@@ -100,7 +92,7 @@ object Products extends Controller {
       errorForm
     } else
       productForm
-    Ok(views.html.products.editProduct(form))
+    Ok(views.html.products.editProduct(form, None))
   }
 
   /**
@@ -134,36 +126,36 @@ object Products extends Controller {
   /**
    * Displays a form for editing product details.
    */
-  //  def edit(ean: Long) = Action { implicit request =>
-  //    val form = if (flash.get("error").isDefined)
-  //      updateProductForm(ean).bind(flash.data)
-  //    else
-  //      updateProductForm(ean).fill(Product.findByEan(ean).get)
-  //
-  //    Ok(views.html.products.editProduct(form, Some(ean)))
-  //  }
+    def edit(ean: Long) = Action { implicit request =>
+      val form = if (request.flash.get("error").isDefined)
+        updateProductForm(ean).bind(request.flash.data)
+      else
+        updateProductForm(ean).fill(Product.findByEan(ean).get)
+
+      Ok(views.html.products.editProduct(form, Some(ean)))
+    }
 
   /**
    * Saves changes to a product’s details.
    */
-  //  def update(ean: Long) = Action { implicit request =>
-  //    if (Product.findByEan(ean).isEmpty)
-  //      NotFound
-  //    else {
-  //      val updatedProductForm = updateProductForm(ean).bindFromRequest()
-  //
-  //      updatedProductForm.fold(
-  //        hasErrors = { form =>
-  //          Redirect(routes.Products.edit(ean)).flashing(Flash(form.data) +
-  //            ("error" -> Messages("validation.errors")))
-  //        },
-  //        success = { updatedProduct =>
-  //          Product.remove(Product.findByEan(ean).get)
-  //          Product.add(updatedProduct)
-  //          val successMessage = "success" -> Messages("products.update.success", updatedProduct.name)
-  //          Redirect(routes.Products.show(updatedProduct.ean)).flashing(successMessage)
-  //        }
-  //      )
-  //    }
-  //  }
+    def update(ean: Long) = Action { implicit request =>
+      if (Product.findByEan(ean).isEmpty)
+        NotFound
+      else {
+        val updatedProductForm = updateProductForm(ean).bindFromRequest()
+
+        updatedProductForm.fold(
+          hasErrors = { form =>
+            Redirect(routes.Products.edit(ean)).flashing(Flash(form.data) +
+              ("error" -> Messages("validation.errors")))
+          },
+          success = { updatedProduct =>
+            Product.remove(Product.findByEan(ean).get)
+            Product.add(updatedProduct)
+            val successMessage = "success" -> Messages("products.update.success", updatedProduct.name)
+            Redirect(routes.Products.show(updatedProduct.ean)).flashing(successMessage)
+          }
+        )
+      }
+    }
 }
