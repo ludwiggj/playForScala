@@ -1,0 +1,2 @@
+DROP DATABASE IF EXISTS paperclips;
+CREATE DATABASE paperclips;

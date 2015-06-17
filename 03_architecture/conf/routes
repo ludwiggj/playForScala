@@ -1,0 +1,6 @@
+GET     /                           controllers.Application.index
+GET     /template                   controllers.Application.template
+GET     /minimal                    controllers.Application.minimal
+GET     /title                      controllers.Application.title
+
+GET     /assets/*file               controllers.Assets.at(path="/public", file)
