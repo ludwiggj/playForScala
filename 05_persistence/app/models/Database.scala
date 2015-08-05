@@ -1,63 +1,53 @@
 package models
 
-// #ch05-anorm-model
+// Anorm model
 case class Product(
-  id: Long,
-  ean: Long,
-  name: String,
-  description: String)
+                    id: Long,
+                    ean: Long,
+                    name: String,
+                    description: String)
 
-case class Warehouse(id: Long, name: String)
-
-case class StockItem(
-  id: Long,
-  productId: Long,
-  warehouseId: Long,
-  quantity: Long)
-// #ch05-anorm-model
-
+// Companion object contains DAO code
 object Product {
-  // #ch05-anorm-query
+
+  // Anorm query
+
   import anorm.SQL
   import anorm.SqlQuery
 
   val sql: SqlQuery = SQL("select * from products order by name asc")
-  // #ch05-anorm-query
 
-  // #ch05-anorm-stream
+  // Using Anorm's stream API to process query results
+
   import play.api.Play.current
   import play.api.db.DB
 
-  def getAll: List[Product] = DB.withConnection {   //#A
-
-
-    implicit connection =>  //#B
-
-    sql().map ( row => //#C
-
-      Product(row[Long]("id"), row[Long]("ean"),          //#D
-        row[String]("name"), row[String]("description"))  //#D
-
-    ).toList  //#E
+  def getAll: List[Product] = DB.withConnection {
+    implicit connection =>
+      sql().map(row =>
+        Product(row[Long]("id"), row[Long]("ean"),
+          row[String]("name"), row[String]("description"))
+      ).toList
   }
-  // #ch05-anorm-stream
 
-  // #ch05-anorm-patterns
+  // Query using Anorm pattern matching
   def getAllWithPatterns: List[Product] = DB.withConnection {
     implicit connection =>
 
-    import anorm.Row
+      import anorm.Row
 
-    sql().collect {
-      // Needed to change type of id and ean from Long to Int to get it to work
-      case Row(Some(id: Int), Some(ean: Int),              //#A
-          Some(name: String), Some(description: String)) =>  //#A
-        Product(id, ean, name, description)    //#B
-    }.toList
+      sql().collect {
+        // NOTE: Needed to change type of id and ean from Long to Int to get it to work
+        case Row(Some(id: Int), Some(ean: Int),
+        Some(name: String), Some(description: String)) =>
+          Product(id, ean, name, description)
+      }.toList
   }
-  // #ch05-anorm-patterns
 
-  // #ch05-anorm-product-parser
+  // Query using Anorm parsers
+
+  // First a row parser to convert row into a product
+
   import anorm.RowParser
 
   val productParser: RowParser[Product] = {
@@ -69,22 +59,21 @@ object Product {
         Product(id, ean, name, description)
     }
   }
-  // #ch05-anorm-product-parser
 
-  // #ch05-anorm-products-parser
+  // But sql.as() method requires a ResultSetParser, so we need to build
+  // a ResultSetParser from a RowParser
+
   import anorm.ResultSetParser
 
   val productsParser: ResultSetParser[List[Product]] = {
-     productParser *
+    // * means parse zero or more rows using productParser
+    productParser *
   }
-  // #ch05-anorm-products-parser
 
-  // #ch05-anorm-parse-products
   def getAllWithParser: List[Product] = DB.withConnection {
     implicit connection =>
-    sql.as(productsParser)
+      sql.as(productsParser)
   }
-  // #ch05-anorm-parse-products
 
   def findById(id: Long): Option[Product] = {
     DB.withConnection { implicit connection =>
@@ -93,93 +82,98 @@ object Product {
     }
   }
 
-  // #ch05-anorm-productstockitem-parser
-
+  // Parse combination of product and stock item
   def productStockItemParser: RowParser[(Product, StockItem)] = {
-    import anorm.~
     import anorm.SqlParser._
 
     productParser ~ StockItem.stockItemParser map (flatten)
   }
-  // #ch05-anorm-productstockitem-parser
 
-  // #ch05-anorm-productstockitems
+  // Used the parse combination of product and stock item
+
+  // NOTE: This method isn't tested.
   def getAllProductsWithStockItems: Map[Product, List[StockItem]] = {
     DB.withConnection { implicit connection =>
-      val sql = SQL("select p.*, s.* " +                     //#A
-        "from products p " +                                 //#A
-        "inner join stock_items s on (p.id = s.product_id)") //#A
+      val sql = SQL("select p.*, s.* " +
+        "from products p " +
+        "inner join stock_items s on (p.id = s.product_id)")
 
-      val results: List[(Product, StockItem)] =
-        sql.as(productStockItemParser *)        //#B
+        val results: List[(Product, StockItem)] = sql.as(productStockItemParser *)
 
-      results.groupBy { _._1 }.mapValues { _.map { _._2 } } //#C
+        results.groupBy { _._1 }.mapValues { _.map { _._2 } }
+      }
     }
-  }
-  // #ch05-anorm-productstockitems
 
   def search(query: String) = DB.withConnection { implicit connection =>
-    SQL(s"""select *
-      from products
-      where name like '%${query}%'
-      or description like '%${query}%'""").
+    SQL( s"""select *
+        from products
+        where name like '%${query}%'
+        or description like '%${query}%'""").
       on("query" -> query).as(this.productsParser)
   }
 
-  // #ch05-anorm-insert
+  // Anorm, insert data
   def insert(product: Product): Boolean = {
     DB.withConnection { implicit connection =>
-      SQL("""insert
+      SQL( """insert
       into products
-      values ({id}, {ean}, {name}, {description})""").on( //#A
-        "id" -> product.id,                   //#B
-        "ean" -> product.ean,                 //#B
-        "name" -> product.name,               //#B
-        "description" -> product.description  //#B
-      ).executeUpdate() == 1  //#C
+      values ({id}, {ean}, {name}, {description})""").on(
+          "id" -> product.id,
+          "ean" -> product.ean,
+          "name" -> product.name,
+          "description" -> product.description
+        ).executeUpdate() == 1
     }
   }
-  // #ch05-anorm-insert
 
-  // #ch05-anorm-update-delete
+  // Anorm, update data
   def update(product: Product): Boolean = {
     DB.withConnection { implicit connection =>
-      SQL("""update products
-      set name = {name},
-      ean = {ean},
-      description = {description}
-      where id = {id}
-       """).on(
-        "id" -> product.id,
-        "name" -> product.name,
-        "ean" -> product.ean,
-        "description" -> product.description).
+      SQL( """update products
+        set name = {name},
+        ean = {ean},
+        description = {description}
+        where id = {id}
+           """).on(
+          "id" -> product.id,
+          "name" -> product.name,
+          "ean" -> product.ean,
+          "description" -> product.description).
         executeUpdate() == 1
     }
   }
 
+  // Anorm, delete data
   def delete(product: Product): Boolean = {
     DB.withConnection { implicit connection =>
       SQL("delete from products where id = {id}").
         on("id" -> product.id).executeUpdate() == 0
     }
   }
-  // #ch05-anorm-update-delete
 }
 
+// Anorm model
+case class StockItem(
+                      id: Long,
+                      productId: Long,
+                      warehouseId: Long,
+                      quantity: Long)
+
+// Companion object contains DAO code
 object StockItem {
+
   import anorm.RowParser
 
-  // #ch05-anorm-stockitem-parser
   val stockItemParser: RowParser[StockItem] = {
     import anorm.SqlParser._
     import anorm.~
 
     long("id") ~ long("product_id") ~
-        long("warehouse_id") ~ long("quantity") map {
+      long("warehouse_id") ~ long("quantity") map {
       case id ~ productId ~ warehouseId ~ quantity =>
         StockItem(id, productId, warehouseId, quantity)
     }
   }
-  // #ch05-anorm-stockitem-parser
 }
+
+case class Warehouse(id: Long, name: String)

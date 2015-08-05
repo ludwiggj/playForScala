@@ -1,13 +1,14 @@
 package test
 
-import com.avaje.ebean.Ebean
 import models.Product
-import org.specs2.execute.{AsResult, Result}
+import org.specs2.execute.AsResult
 import org.specs2.matcher.MatchResult
 import org.specs2.mutable.Around
 import org.specs2.specification.mutable.SpecificationFeatures
+import play.api.db.DB
 import play.api.test.FakeApplication
 import play.api.test.Helpers._
+import play.api.Play.current
 
 import scala.io.Source
 
@@ -27,16 +28,20 @@ trait DatabaseHelpers {
       upsDowns = splitEvolutionContent(1).split("# --- !Downs")
     } yield (upsDowns(1), upsDowns(0))
 
-    val dropDdls = (ddls map {_._1}).reverse
-    val createDdls = ddls map {_._2}
+    val dropDdls = (ddls map {
+      _._1
+    }).reverse
+    val createDdls = ddls map {
+      _._2
+    }
 
     def dropCreateDb() = {
-      for (dropDdl <- dropDdls) {
-        Ebean.execute(Ebean.createCallableSql(dropDdl))
-      }
+      DB.withConnection { conn =>
 
-      for (createDdl <- createDdls) {
-        Ebean.execute(Ebean.createCallableSql(createDdl))
+        for (ddl <- dropDdls ++ createDdls) {
+          val statement = conn.createStatement
+          val resultset = statement.execute(ddl)
+        }
       }
     }
 
