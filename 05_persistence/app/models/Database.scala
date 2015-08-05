@@ -1,5 +1,7 @@
 package models
 
+import anorm._
+
 // Anorm model
 case class Product(
                     id: Long,
@@ -54,7 +56,7 @@ object Product {
     import anorm.~
     import anorm.SqlParser._
 
-    long("id") ~ long("ean") ~ str("name") ~ str("description") map {
+    long("products.id") ~ long("products.ean") ~ str("products.name") ~ str("products.description") map {
       case id ~ ean ~ name ~ description =>
         Product(id, ean, name, description)
     }
@@ -98,11 +100,11 @@ object Product {
         "from products p " +
         "inner join stock_items s on (p.id = s.product_id)")
 
-        val results: List[(Product, StockItem)] = sql.as(productStockItemParser *)
+      val results: List[(Product, StockItem)] = sql.as(productStockItemParser *)
 
-        results.groupBy { _._1 }.mapValues { _.map { _._2 } }
-      }
+      results.groupBy { _._1 }.mapValues { _.map { _._2 } }
     }
+  }
 
   def search(query: String) = DB.withConnection { implicit connection =>
     SQL( s"""select *
@@ -163,15 +165,31 @@ case class StockItem(
 object StockItem {
 
   import anorm.RowParser
+  import play.api.Play.current
+  import play.api.db.DB
 
   val stockItemParser: RowParser[StockItem] = {
     import anorm.SqlParser._
     import anorm.~
 
-    long("id") ~ long("product_id") ~
-      long("warehouse_id") ~ long("quantity") map {
+    long("stock_items.id") ~ long("stock_items.product_id") ~
+      long("stock_items.warehouse_id") ~ long("stock_items.quantity") map {
       case id ~ productId ~ warehouseId ~ quantity =>
         StockItem(id, productId, warehouseId, quantity)
+    }
+  }
+
+  // Anorm, insert data
+  def insert(item: StockItem): Boolean = {
+    DB.withConnection { implicit connection =>
+      SQL( """insert
+        into stock_items
+        values ({id}, {product_id}, {warehouse_id}, {quantity})""").on(
+          "id" -> item.id,
+          "product_id" -> item.productId,
+          "warehouse_id" -> item.warehouseId,
+          "quantity" -> item.quantity
+        ).executeUpdate() == 1
     }
   }
 }

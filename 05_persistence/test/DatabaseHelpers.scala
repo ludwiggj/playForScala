@@ -1,6 +1,6 @@
 package test
 
-import models.Product
+import models.{StockItem, Product}
 import org.specs2.execute.AsResult
 import org.specs2.matcher.MatchResult
 import org.specs2.mutable.Around
@@ -16,6 +16,7 @@ trait DatabaseHelpers {
   this: SpecificationFeatures =>
   val product = Product(1, 342545645l, "P1", "simple paperclip")
   val products = 0 to 10 map { i => Product(i, 84928173l + i, "P" + i, "paperclip " + i) }
+  val stockItems = 0 to 2 map { i => StockItem(i, product.id, 21645 + i, 5 + 2*i) }
 
   trait Schema extends Around {
 
@@ -36,11 +37,11 @@ trait DatabaseHelpers {
     }
 
     def dropCreateDb() = {
-      DB.withConnection { conn =>
+      DB.withConnection { implicit connection =>
 
         for (ddl <- dropDdls ++ createDdls) {
-          val statement = conn.createStatement
-          val resultset = statement.execute(ddl)
+          val statement = connection.createStatement
+          statement.execute(ddl)
         }
       }
     }
@@ -59,6 +60,18 @@ trait DatabaseHelpers {
   object SingleProduct extends Schema {
     override def around[T: AsResult](test: => T) = super.around {
       Product.insert(product)
+
+      test
+    }
+  }
+
+  object SingleProductWithStockItems extends Schema {
+    override def around[T: AsResult](test: => T) = super.around {
+      Product.insert(product)
+
+      stockItems.foreach {
+        StockItem.insert(_)
+      }
 
       test
     }

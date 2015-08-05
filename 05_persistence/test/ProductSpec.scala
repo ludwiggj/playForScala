@@ -103,5 +103,17 @@ class ProductSpec extends Specification with DatabaseHelpers {
 
       foundProducts must have length (this.products.size)
     }
+
+    "be retrievable with associated stock items" in SingleProductWithStockItems {
+      val foundProducts = Product.getAllProductsWithStockItems
+
+      foundProducts must have length (1)
+
+      val (product, items) = foundProducts.head
+
+      product must beEqualTo(this.product)
+
+      items must containTheSameElementsAs(this.stockItems)
+    }
   }
 }
