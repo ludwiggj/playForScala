@@ -40,8 +40,7 @@ trait DatabaseHelpers {
       DB.withConnection { implicit connection =>
 
         for (ddl <- dropDdls ++ createDdls) {
-          val statement = connection.createStatement
-          statement.execute(ddl)
+          connection.createStatement.execute(ddl)
         }
       }
     }
