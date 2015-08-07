@@ -69,12 +69,12 @@ object Product {
   /**
    * The product with the given EAN code.
    */
-  def findByEan(ean: Long) = inTransaction {
-    from(productsTable)(p =>
-      where(p.ean === ean)
-        select (p)
-    ).headOption
-  }
+//  def findByEan(ean: Long) = inTransaction {
+//    from(productsTable)(p =>
+//      where(p.ean === ean)
+//        select (p)
+//    ).headOption
+//  }
 
   /**
    * Products whose name matches the given query.
@@ -97,8 +97,9 @@ object Product {
    * Adds a product to the catalog.
    */
   def insert(product: Product) = inTransaction {
-    productsTable.insert(product.copy())
-    findByEan(product.ean).get
+    productsTable.insert(product)
+//    productsTable.insert(product.copy())
+//    findByEan(product.ean).get
   }
 
   /**
