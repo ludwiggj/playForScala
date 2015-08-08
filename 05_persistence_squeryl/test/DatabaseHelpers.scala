@@ -13,11 +13,11 @@ import scala.io.Source
 trait DatabaseHelpers {
   this: SpecificationFeatures =>
   val product = Product(342545645l, "P1", "simple paperclip")
-  val products = 0 to 10 map { i => Product(84928173l + i, "P" + i, "paperclip " + i) }
+  var products = 0 to 10 map { i => Product(84928173l + i, "P" + i, "paperclip " + i) }
   val stockItems = 0 to 2 map { i => StockItem(product.id, 21645 + i, 5 + 2 * i) }
 
-  val forbiddenPlanet = Warehouse("Forbidden Planet")
-  val gosh = Warehouse("Gosh")
+  var forbiddenPlanet = Warehouse("Forbidden Planet")
+  var gosh = Warehouse("Gosh")
 
   val opticNerve = Product(1l, "Optic Nerve", "A depressing comic")
   val sandman = Product(2l, "Sandman", "A classic")
@@ -85,12 +85,10 @@ trait DatabaseHelpers {
       val sandmanId = Product.insert(sandman).id
       val starmanId = Product.insert(starman).id
 
-//      forbiddenPlanet = Warehouse.insert(forbiddenPlanet)
-      Warehouse.insert(forbiddenPlanet)
-      val forbiddenPlanetId = forbiddenPlanet.id
+      forbiddenPlanet = Warehouse.insert(forbiddenPlanet)
+      val forbiddenPlanetId =  forbiddenPlanet.id
 
-//      gosh = Warehouse.insert(gosh)
-      Warehouse.insert(gosh)
+      gosh = Warehouse.insert(gosh)
       val goshId = gosh.id
 
       val centralCityComicsId = Warehouse.insert(Warehouse("Central City Comics")).id
@@ -110,7 +108,7 @@ trait DatabaseHelpers {
 
   object SeveralProducts extends Schema {
     override def around[T: AsResult](test: => T) = super.around {
-      products.foreach {
+      products = products.map {
         Product.insert(_)
       }
 

@@ -69,41 +69,41 @@ object Product {
   /**
    * The product with the given EAN code.
    */
-//  def findByEan(ean: Long) = inTransaction {
-//    from(productsTable)(p =>
-//      where(p.ean === ean)
-//        select (p)
-//    ).headOption
-//  }
+  def findByEan(ean: Long) = inTransaction {
+    from(productsTable)(p =>
+      where(p.ean === ean)
+        select (p)
+    ).headOption
+  }
 
   /**
    * Products whose name matches the given query.
    */
-  //  def findByName(query: String) = inTransaction {
-  //    from(productsTable) ( p =>
-  //      where(p.name like ("%" + query + "%"))
-  //      select(p)
-  //    ).toList
-  //  }
+  def findByName(query: String) = inTransaction {
+    from(productsTable)(p =>
+      where(p.name like ("%" + query + "%"))
+        select (p)
+    ).toList
+  }
 
   /**
    * Deletes a product from the catalog.
    */
-  //  def remove(product: Product) = inTransaction {
-  //    productsTable.delete(product.id)
-  //  }
+  def remove(product: Product) = inTransaction {
+    productsTable.delete(product.id)
+  }
 
   /**
    * Adds a product to the catalog.
    */
   def insert(product: Product) = inTransaction {
-    productsTable.insert(product)
-//    productsTable.insert(product.copy())
-//    findByEan(product.ean).get
+    val defensiveCopy = product.copy()
+    productsTable.insert(defensiveCopy)
+    defensiveCopy
   }
 
   /**
-   * Updates a product in the catalg.
+   * Updates a product in the catalog.
    */
   def update(product: Product) {
     inTransaction {
