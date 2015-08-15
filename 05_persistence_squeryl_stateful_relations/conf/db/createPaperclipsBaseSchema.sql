@@ -1,0 +1,3 @@
+CREATE DATABASE IF NOT EXISTS paperclips;
+GRANT ALL PRIVILEGES ON paperclips.* TO 'paper'@'localhost' IDENTIFIED BY 'cut';
+FLUSH PRIVILEGES;
