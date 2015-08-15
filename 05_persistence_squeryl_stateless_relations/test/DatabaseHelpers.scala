@@ -1,4 +1,4 @@
-import models.{Warehouse, StockItem, Product}
+import models.{ProductStateless, WarehouseStateless, StockItemStateless}
 import org.specs2.execute.AsResult
 import org.specs2.matcher.MatchResult
 import org.specs2.mutable.Around
@@ -12,16 +12,15 @@ import scala.io.Source
 
 trait DatabaseHelpers {
   this: SpecificationFeatures =>
-  val product = Product(342545645l, "P1", "simple paperclip")
-  var products = 0 to 10 map { i => Product(84928173l + i, "P" + i, "paperclip " + i) }
-  val stockItems = 0 to 2 map { i => StockItem(product.id, 21645 + i, 5 + 2 * i) }
+  val product = ProductStateless(342545645l, "P1", "simple paperclip")
+  var products = 0 to 10 map { i => ProductStateless(84928173l + i, "P" + i, "paperclip " + i) }
 
-  var forbiddenPlanet = Warehouse("Forbidden Planet")
-  var gosh = Warehouse("Gosh")
+  var warehouseForbiddenPlanet = WarehouseStateless("Forbidden Planet")
+  var warehouseGosh = WarehouseStateless("Gosh")
 
-  val opticNerve = Product(1l, "Optic Nerve", "A depressing comic")
-  val sandman = Product(2l, "Sandman", "A classic")
-  val starman = Product(3l, "Starman", "An revisionist take on a minor character from the 50s")
+  var productOpticNerve = ProductStateless(1l, "Optic Nerve", "A depressing comic")
+  var productSandman = ProductStateless(2l, "Sandman", "A classic")
+  var productStarman = ProductStateless(3l, "Starman", "An revisionist take on a minor character from the 50s")
 
   trait Schema extends Around {
 
@@ -59,7 +58,7 @@ trait DatabaseHelpers {
 
   object SingleProduct extends Schema {
     override def around[T: AsResult](test: => T) = super.around {
-      Product.insert(product)
+      ProductStateless.insert(product)
 
       test
     }
@@ -69,26 +68,23 @@ trait DatabaseHelpers {
 
     override def around[T: AsResult](test: => T) = super.around {
 
-      val opticNerveId = Product.insert(opticNerve).id
-      val sandmanId = Product.insert(sandman).id
-      val starmanId = Product.insert(starman).id
+      productOpticNerve = ProductStateless.insert(productOpticNerve)
+      productSandman = ProductStateless.insert(productSandman)
+      productStarman = ProductStateless.insert(productStarman)
 
-      forbiddenPlanet = Warehouse.insert(forbiddenPlanet)
-      val forbiddenPlanetId =  forbiddenPlanet.id
+      warehouseForbiddenPlanet = WarehouseStateless.insert(warehouseForbiddenPlanet)
+      warehouseGosh = WarehouseStateless.insert(warehouseGosh)
 
-      gosh = Warehouse.insert(gosh)
-      val goshId = gosh.id
+      val warehouseCentralCityComics = WarehouseStateless.insert(WarehouseStateless("Central City Comics"))
 
-      val centralCityComicsId = Warehouse.insert(Warehouse("Central City Comics")).id
+      StockItemStateless.insert(StockItemStateless(1), productOpticNerve, warehouseForbiddenPlanet)
+      StockItemStateless.insert(StockItemStateless(3), productSandman, warehouseForbiddenPlanet)
+      StockItemStateless.insert(StockItemStateless(5), productStarman, warehouseForbiddenPlanet)
 
-      StockItem.insert(StockItem(opticNerveId, forbiddenPlanetId, 1))
-      StockItem.insert(StockItem(sandmanId, forbiddenPlanetId, 3))
-      StockItem.insert(StockItem(starmanId, forbiddenPlanetId, 5))
+      StockItemStateless.insert(StockItemStateless(7), productSandman, warehouseCentralCityComics)
 
-      StockItem.insert(StockItem(sandmanId, centralCityComicsId, 7))
-
-      StockItem.insert(StockItem(opticNerveId, goshId, 2))
-      StockItem.insert(StockItem(starmanId, goshId, 4))
+      StockItemStateless.insert(StockItemStateless(2), productOpticNerve, warehouseGosh)
+      StockItemStateless.insert(StockItemStateless(4), productStarman, warehouseGosh)
 
       test
     }
@@ -97,7 +93,7 @@ trait DatabaseHelpers {
   object SeveralProducts extends Schema {
     override def around[T: AsResult](test: => T) = super.around {
       products = products.map {
-        Product.insert(_)
+        ProductStateless.insert(_)
       }
 
       test
