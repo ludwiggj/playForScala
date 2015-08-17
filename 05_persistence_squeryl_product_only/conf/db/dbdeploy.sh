@@ -2,7 +2,7 @@
 
 USER_HOME=/Users/ludwiggj
 PLAY_HOME=${USER_HOME}/code/play
-PERSISTENCE_DB_HOME=${PLAY_HOME}/05_persistence/conf/db
+PERSISTENCE_DB_HOME=${PLAY_HOME}/05_persistence_squeryl_product_only/conf/db
 
 DB_URL=jdbc:mysql://localhost:3306/paperclips
 DB_DRIVER=com.mysql.jdbc.Driver

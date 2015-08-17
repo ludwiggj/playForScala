@@ -11,7 +11,6 @@ libraryDependencies ++= Seq(
   cache,
   ws,
   specs2 % Test,
-//  "mysql" % "mysql-connector-java" % "latest.release",
   "net.sf.barcode4j" % "barcode4j" % "2.0",
   "org.squeryl" %% "squeryl" % "0.9.5-7",
   "mysql" % "mysql-connector-java" % "5.1.10",
