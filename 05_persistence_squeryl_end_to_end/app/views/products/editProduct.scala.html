@@ -1,8 +1,7 @@
-@(productForm: Form[Product], ean: Option[Long])(implicit flash: Flash, lang: Lang)
+@(productForm: play.api.data.Form[Product], ean: Option[Long], flash: play.api.mvc.Flash)(implicit lang: Lang)
 @import helper._
-@import helper.twitterBootstrap._
 
-@main(Messages("products.form")) {
+@main(Messages("products.form"), flash) {
   <h2>@Messages("products.form")</h2>
 
   @helper.form(action = ean.map(routes.Products.update(_)).getOrElse(routes.Products.save())) {
@@ -17,4 +16,4 @@
     <p><input type="submit" class="btn primary"
               value='@ean.map(_=> Messages("products.edit.submit")).getOrElse(Messages("products.new.submit"))'></p>
   }
-}
+}(lang)

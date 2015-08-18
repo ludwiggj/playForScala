@@ -79,7 +79,7 @@ object Products extends Controller {
    * Displays a products list.
    */
   def list = Action { implicit request =>
-    Ok(views.html.products.list(Product.findAll))
+    Ok(views.html.products.list(Product.findAll, request.flash)(request))
   }
 
   /**
@@ -92,7 +92,7 @@ object Products extends Controller {
       errorForm
     } else
       productForm
-    Ok(views.html.products.editProduct(form, None))
+    Ok(views.html.products.editProduct(form, None, request.flash))
   }
 
   /**
@@ -100,7 +100,7 @@ object Products extends Controller {
    */
   def show(ean: Long) = Action { implicit request =>
     Product.findByEan(ean).map { product =>
-      Ok(views.html.products.details(product))
+      Ok(views.html.products.details(product, request.flash))
     }.getOrElse(NotFound)
   }
 
@@ -112,13 +112,14 @@ object Products extends Controller {
 
     newProductForm.fold(
       hasErrors = { form =>
-        Redirect(routes.Products.newProduct()).flashing(Flash(form.data) +
-          ("error" -> Messages("validation.errors")))
+        Redirect(routes.Products.newProduct()).flashing(Flash(form.data))
+//          + ("error" -> Messages("validation.errors")))
       },
       success = { newProduct =>
         Product.add(newProduct)
-        val successMessage = ("success" -> Messages("products.new.success", newProduct.name))
-        Redirect(routes.Products.show(newProduct.ean)).flashing(successMessage)
+//        val successMessage = ("success" -> Messages("products.new.success", newProduct.name))
+        Redirect(routes.Products.show(newProduct.ean))
+//          .flashing(successMessage)
       }
     )
   }
@@ -132,7 +133,7 @@ object Products extends Controller {
     else
       updateProductForm(ean).fill(Product.findByEan(ean).get)
 
-    Ok(views.html.products.editProduct(form, Some(ean)))
+    Ok(views.html.products.editProduct(form, Some(ean), request.flash))
   }
 
   /**
@@ -146,14 +147,15 @@ object Products extends Controller {
 
       updatedProductForm.fold(
         hasErrors = { form =>
-          Redirect(routes.Products.edit(ean)).flashing(Flash(form.data) +
-            ("error" -> Messages("validation.errors")))
+          Redirect(routes.Products.edit(ean)).flashing(Flash(form.data))
+//            + ("error" -> Messages("validation.errors")))
         },
         success = { updatedProduct =>
           Product.remove(Product.findByEan(ean).get)
           Product.add(updatedProduct)
-          val successMessage = "success" -> Messages("products.update.success", updatedProduct.name)
-          Redirect(routes.Products.show(updatedProduct.ean)).flashing(successMessage)
+//          val successMessage = "success" -> Messages("products.update.success", updatedProduct.name)
+          Redirect(routes.Products.show(updatedProduct.ean))
+//            .flashing(successMessage)
         }
       )
     }
@@ -168,8 +170,9 @@ object Products extends Controller {
     else {
       val product = Product.findByEan(ean).get
       Product.remove(product)
-      val successMessage = "success" -> Messages("products.delete.success", product.name)
-      Redirect(routes.Products.list()).flashing(successMessage)
+//      val successMessage = "success" -> Messages("products.delete.success", product.name)
+      Redirect(routes.Products.list())
+//        .flashing(successMessage)
     }
   }
 }

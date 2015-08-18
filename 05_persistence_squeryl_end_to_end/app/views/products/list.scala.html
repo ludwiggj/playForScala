@@ -1,12 +1,6 @@
-@*
-  Displays a products list.
+@(products: scala.List[Product], flash: play.api.mvc.Flash)(request: play.api.mvc.RequestHeader)(implicit lang: Lang)
 
-  @param products A list of products
-  @param flash Flash scope
-*@
-@(products: List[Product])(implicit flash: Flash, request: RequestHeader, lang: Lang)
-
-@main(Messages("products.list")) {
+@main(Messages("products.list"), flash) {
 
   <dl class="products">
     @for(product <- products) {
@@ -20,4 +14,4 @@
 
   <p><a href="@controllers.routes.Products.newProduct()" class="btn">
     <i class="icon-plus"></i> @Messages("products.new.command")</a></p>
-}
+}(lang)

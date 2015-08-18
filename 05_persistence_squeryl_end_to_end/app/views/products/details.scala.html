@@ -1,12 +1,6 @@
-@*
-  Displays details for one product.
+@(product: Product, flash: play.api.mvc.Flash)(implicit lang: Lang)
 
-  @param productForm A form for capturing product details.
-  @param flash Flash scope
-*@
-@(product: Product)(implicit flash: Flash, lang: Lang)
-
-@main(Messages("products.details", product.name)) {
+@main(Messages("products.details", product.name), flash) {
   <h2>
     @tags.barcode(product.ean)
     @Messages("products.details", product.name)
@@ -29,4 +23,4 @@
   </a>
   <input type="submit" class="btn primary" value='@Messages("products.delete.command")'>
   }
-}
+}(lang)
