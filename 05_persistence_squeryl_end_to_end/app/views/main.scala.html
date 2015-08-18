@@ -1,4 +1,4 @@
-@(title: String, flash: play.api.mvc.Flash)(content: Html)(implicit lang: Lang)
+@(title: String)(content: Html)(implicit flash: play.api.mvc.Flash, lang: Lang)
 <!DOCTYPE html>
 <html>
 <head>
@@ -41,7 +41,7 @@
     }
     @content
 
-    <footer>@debug()(lang)</footer>
+    <footer>@debug(lang)</footer>
   </div>
 </div>
 </body>

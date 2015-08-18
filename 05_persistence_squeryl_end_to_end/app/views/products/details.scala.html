@@ -1,6 +1,6 @@
-@(product: Product, flash: play.api.mvc.Flash)(implicit lang: Lang)
+@(product: Product)(implicit flash: play.api.mvc.Flash, lang: Lang)
 
-@main(Messages("products.details", product.name), flash) {
+@main(Messages("products.details", product.name)) {
   <h2>
     @tags.barcode(product.ean)
     @Messages("products.details", product.name)
@@ -23,4 +23,4 @@
   </a>
   <input type="submit" class="btn primary" value='@Messages("products.delete.command")'>
   }
-}(lang)
+}(flash, lang)
