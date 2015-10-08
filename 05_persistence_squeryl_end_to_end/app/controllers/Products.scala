@@ -12,7 +12,7 @@ import play.api.i18n.Messages.Implicits._
 /**
  * Controller for products HTTP interface.
  */
-object Products extends Controller  {
+class Products extends Controller  {
 
   /**
    * Returns true if the given EAN’s checksum is correct.
@@ -118,7 +118,7 @@ object Products extends Controller  {
           + ("error" -> Messages("validation.errors")))
       },
       success = { newProduct =>
-        Product.add(newProduct)
+        Product.insert(newProduct)
         val successMessage = ("success" -> Messages("products.new.success", newProduct.name))
         Redirect(routes.Products.show(newProduct.ean)).flashing(successMessage)
       }
@@ -153,7 +153,7 @@ object Products extends Controller  {
         },
         success = { updatedProduct =>
           Product.remove(Product.findByEan(ean).get)
-          Product.add(updatedProduct)
+          Product.insert(updatedProduct)
           val successMessage = "success" -> Messages("products.update.success", updatedProduct.name)
           Redirect(routes.Products.show(updatedProduct.ean)).flashing(successMessage)
         }
