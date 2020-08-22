@@ -19,7 +19,7 @@ object Global extends GlobalSettings {
 			Product.insert(Product(5018306312913L, "No Tear Paper Clip", "No Tear Extra Large Pack of 1000"))
 			Product.insert(Product(5018206244611L, "Zebra Paperclips", "Zebra Length 28mm Assorted 150 Pack"))
 		}
-		
+
 		reloadDatabase
 	}
 }

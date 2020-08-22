@@ -1,0 +1,31 @@
+@(widgets:Long)
+
+@main {
+
+  <h1>Widget Factory</h1>
+  <div>Current Number of Widgets: <span id="widget-count">@widgets</span></div>
+  <div class="container">
+    <h3>Widget Search</h3>
+    <span>
+      <input id="search-name" type="text" name="name" placeholder="Search for a Widget by Name">
+      <div class="search-results"></div>
+    </span>
+  </div>
+  <div class="container">
+    <h3>Create a New Widget</h3>
+      <span><input id="create-name" type="text" name="name" placeholder="Name for a new Widget"></span>
+      <span><input id="create" type="button" value="Create" /></span>
+  </div>
+  <div id="selected" class="container">
+    <h3>Selected Widget:</h3>
+    <div id="no-widget-selected">None</div>
+    <div id="widget-selected">
+      Some(Widget(
+      <span id="widget-id">&nbsp;</span>,
+      <span id="widget-name">&nbsp;</span>,
+      <span id="widget-created">&nbsp;</span>
+      ))
+    </div>
+  </div>
+
+}
